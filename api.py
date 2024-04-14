@@ -41,9 +41,8 @@ async def stream_video(file_id: str):
                 if current_file_name == file_id:
                     video_path = os.path.join(video_directory, line).strip()
                     if os.path.exists(video_path):
-                        file_extension = line.rsplit('.', 1)[-1].lower()
                         file_like = open(video_path, mode="rb")
-                        return StreamingResponse(file_like, media_type=f"video/{file_extension.strip()}")
+                        return StreamingResponse(file_like, media_type=f"video/{current_file[1].strip()}")
         raise HTTPException(status_code=404, detail="File ID not found in log")
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Log file not found")
