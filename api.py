@@ -48,3 +48,19 @@ async def stream_video(file_id: str):
         raise HTTPException(status_code=404, detail="Log file not found")
     except Exception as e:
         return Response(status_code=500, content=str(e))
+    
+@app.get("/files")
+async def list_files():
+    log_file_path = "file-names.txt"
+    files_list = []
+    try:
+        with open(log_file_path, "r") as file:
+            for line in file:
+                clean_line = line.strip()
+                if clean_line:
+                    files_list.append(clean_line)
+    except FileNotFoundError:
+        return JSONResponse(content={"error": "Log file not found"}, status_code=404)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+    return JSONResponse(files_list)
