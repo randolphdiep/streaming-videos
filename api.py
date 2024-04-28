@@ -2,11 +2,26 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, UploadFile, File,Response
 from starlette.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
+import mimetypes
 from datetime import datetime
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:8000",  # Allow only this origin
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/upload")
 async def upload_video(file: UploadFile = File(...)):
@@ -41,8 +56,9 @@ async def stream_video(file_id: str):
                 if current_file_name == file_id:
                     video_path = os.path.join(video_directory, line).strip()
                     if os.path.exists(video_path):
+                        mime_type, _ = mimetypes.guess_type(line.strip())
                         file_like = open(video_path, mode="rb")
-                        return StreamingResponse(file_like, media_type=f"video/{current_file[1].strip()}")
+                        return StreamingResponse(file_like, media_type=mime_type)
         raise HTTPException(status_code=404, detail="File ID not found in log")
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Log file not found")
