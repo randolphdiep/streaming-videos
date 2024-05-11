@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Video Info</title>
+</head>
+
+<body>
+    <button onclick="location.href='/upload-video'" type="button">
+        Upload Video
+    </button>
+    {% for video in video_info %}
+    <a href="http://localhost:8000/streaming/{{video.file_id}}">
+        <h1>{{ video.title }}</h1>
+    </a>
+    <img src="/uploaded-images/{{ video.file_id }}.jpg" width="100">
+    {% endfor %}
+</body>
+
+</html>

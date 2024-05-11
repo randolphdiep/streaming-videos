@@ -1,0 +1,21 @@
+<html>
+
+<head>
+    <title>Basic Form</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <h1>Basic White Form</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="title">Title:</label>
+        <input type="text" name="title"><br>
+        <label for="video-selection">Select Video:</label>
+        <input type="file" name="file"><br>
+        <label for="thumbnail-selection">Thumbnail:</label>
+        <input type="file" name="image"><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+
+</html>
