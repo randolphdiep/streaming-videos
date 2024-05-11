@@ -7,23 +7,41 @@ from fastapi import Header
 from fastapi.templating import Jinja2Templates
 import shutil
 import os
+import json
+import requests
 from datetime import datetime
 
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/uploaded-images", StaticFiles(directory="uploaded-images"), name="uploaded-images")
 CHUNK_SIZE = 1024*1024
-video_path = Path("./uploaded-videos/20240414124036.mp4")
+# video_path = Path("./uploaded-videos/20240414124036.mp4")
 
 
-@app.get("/")
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", context={"request": request})
+@app.get("/streaming/{file_id}")
+async def read_root(request: Request, file_id: str):
+    return templates.TemplateResponse("streaming-form.html", {"request": request, "file_id": file_id})
+
+@app.get("/", response_class=HTMLResponse)
+async def get_video_info(request: Request):
+    with open("file-info.json", "r") as log_file:
+        data = json.load(log_file)
+        return templates.TemplateResponse('list-video-form.html', {"request": request, "video_info": data})
 
 
-@app.get("/video")
-async def video_endpoint(range: str = Header(None)):
+@app.get("/video/{file_id}")
+async def video_endpoint(range: str = Header(None), file_id: str = None):
+    # read file file-info.json and find the file with the file_id and extract the extension
+    with open("file-info.json", "r") as log_file:
+        data = json.load(log_file)
+    for item in data:
+        if item["file_id"] == file_id:
+            video_path = Path(f"./uploaded-videos/{file_id}{item['ext']}")
+            break
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
     start, end = range.replace("bytes=", "").split("-")
     start = int(start)
     end = int(end) if end else start + CHUNK_SIZE
@@ -39,7 +57,7 @@ async def video_endpoint(range: str = Header(None)):
     
 @app.get('/upload-video', response_class=HTMLResponse)
 def get_basic_form(request: Request):
-    return templates.TemplateResponse("basic-form.html", {"request": request})
+    return templates.TemplateResponse("upload-form.html", {"request": request})
 
 @app.post("/upload-video")
 async def upload_video(title: str = Form(...), file: UploadFile = File(...), image: UploadFile = File(...)):
@@ -47,7 +65,16 @@ async def upload_video(title: str = Form(...), file: UploadFile = File(...), ima
     file_id = datetime.now().strftime("%Y%m%d%H%M%S")
     _, ext = os.path.splitext(file.filename)
 
-    print(title)
+    data = {"file_id": file_id, "title": title, "ext": ext}
+    # Read existing data
+    with open("file-info.json", "r") as log_file:
+        existing_data = json.load(log_file)
+    
+    # Append new data
+    existing_data.append(data)
+
+    with open("file-info.json", "w") as log_file:
+        json.dump(existing_data, log_file)
 
      # Check if the file is a video
     if ext not in ['.mp4', '.avi', '.mov', '.flv', '.wmv']:  # Add or remove extensions as needed
@@ -60,10 +87,6 @@ async def upload_video(title: str = Form(...), file: UploadFile = File(...), ima
     # Save the video file
     with open(video_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-
-    # Append the original filename to a shared txt file
-    with open("file-names.txt", "a") as log_file:
-        log_file.write(f"{file_name}\n")
 
     # Save the image file
     _, image_ext = os.path.splitext(image.filename)
