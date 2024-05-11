@@ -3,18 +3,29 @@
 
 <head>
     <title>Video Info</title>
+    <style>
+        .list {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
     <button onclick="location.href='/upload-video'" type="button">
         Upload Video
     </button>
-    {% for video in video_info %}
-    <a href="http://localhost:8000/streaming/{{video.file_id}}">
-        <h1>{{ video.title }}</h1>
-    </a>
-    <img src="/uploaded-images/{{ video.file_id }}.jpg" width="100">
-    {% endfor %}
+    <div class="list">
+        {% for video in video_info %}
+        <div class="video">
+            <a href="http://localhost:8000/streaming/{{video.file_id}}">
+                <h1>{{ video.title }}</h1>
+            </a>
+            <img src="/uploaded-images/{{ video.file_id }}.jpg" width="100">
+        </div>
+        {% endfor %}
+    </div>
 </body>
 
 </html>
