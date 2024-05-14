@@ -2,13 +2,37 @@
 <html>
 
 <head>
-    <title>FastAPI video streaming</title>
+    <title>Video Streaming</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
 </head>
 
-<body>
-    <video width="1000" controls autoplay muted>
-        <source src="http://localhost:8000/video/{{file_id}}" type="video/mp4" />
-    </video>
+<body class="streaming-page">
+    <div class="container">
+        <a href="http://127.0.0.1:8000/">
+            <button class="home-button">Home Page</button>
+        </a>
+
+        <video id="video-player" controls autoplay muted>
+            <source src="http://localhost:8000/video/{{ file_id }}" type="video/mp4" />
+        </video>
+        <h2 id="video-title" style="color: white; text-transform: capitalize; padding-left: 30px;">{{ video_info.title }}</h2>
+    </div>
+
+    <div class="list-video-streaming">
+        {% for video in video_list %}
+        <div class="video-streaming">
+            <a href="http://localhost:8000/streaming/{{ video.file_id }}">
+                {% set image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] %}
+                {% for ext in image_extensions %}
+                    {% set image_url = '/uploaded-images/' + video.file_id + ext %}
+                    <img src="{{ image_url }}" width="100" onerror="this.style.display='none';">
+                {% endfor %}
+                <h2 style="color: white; text-transform: capitalize; font-size: 12px; max-width: 270px;
+                                                    word-wrap: break-word;">{{ video.title }}</h2>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
 </body>
 
 </html>

@@ -1,21 +1,32 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <title>Basic Form</title>
-    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha512-2uXDRNz08VV5dsiu6H/oOSy4DBtQsgFQfJITf5CKgq9JL5SJ1sKbclVfddTz+/VnsGv2VZ8K4XhBYV8bS9HdJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}?v=2">
 </head>
 
-<body>
-    <h1>Basic White Form</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <label for="title">Title:</label>
-        <input type="text" name="title"><br>
-        <label for="video-selection">Select Video:</label>
-        <input type="file" name="file"><br>
-        <label for="thumbnail-selection">Thumbnail:</label>
-        <input type="file" name="image"><br>
-        <input type="submit" value="Submit">
-    </form>
+<body class="upload-page">
+    <div class="container-title">
+        <h1>Upload Video</h1>
+    </div>
+
+    <div class="container">
+        <form method="POST" enctype="multipart/form-data" id="upload-form">
+            <label for="title">Title</label>
+            <input type="text" name="title" id="title" required><br>
+            <label for="video-selection">Select Video</label>
+            <input type="file" name="file" id="video-selection" required><br>
+            <label for="thumbnail-selection">Thumbnail</label>
+            <input type="file" name="image" id="thumbnail-selection" required><br>
+            <input type="submit" value="Upload" class="upload-btn">
+        </form>
+    </div>
 </body>
 
 </html>

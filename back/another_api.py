@@ -2,13 +2,12 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi import Request, Response, Form, Depends, UploadFile, File
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse,JSONResponse
+from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi import Header
 from fastapi.templating import Jinja2Templates
 import shutil
 import os
 import json
-import requests
 from datetime import datetime
 
 
@@ -22,13 +21,29 @@ CHUNK_SIZE = 1024*1024
 
 @app.get("/streaming/{file_id}")
 async def read_root(request: Request, file_id: str):
-    return templates.TemplateResponse("streaming-form.html", {"request": request, "file_id": file_id})
+    # Đọc dữ liệu từ file-info.json
+    with open("file-info.json", "r") as log_file:
+        data = json.load(log_file)
+
+    # Tìm thông tin về video có file_id tương ứng
+    video_info = next((video for video in data if video["file_id"] == file_id), None)
+    if video_info is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    # Trả về template với thông tin về video và danh sách các video khác
+    return templates.TemplateResponse("streaming-form.html",
+                                      {"request": request, "file_id": file_id, "video_info": video_info, "video_list": data})
+
+
 
 @app.get("/", response_class=HTMLResponse)
 async def get_video_info(request: Request):
     with open("file-info.json", "r") as log_file:
         data = json.load(log_file)
+        if isinstance(data, dict):  # Check if data is a dictionary
+            data = [data]  # Convert data to a list containing one element
         return templates.TemplateResponse('list-video-form.html', {"request": request, "video_info": data})
+
 
 
 @app.get("/video/{file_id}")
@@ -69,7 +84,7 @@ async def upload_video(title: str = Form(...), file: UploadFile = File(...), ima
     # Read existing data
     with open("file-info.json", "r") as log_file:
         existing_data = json.load(log_file)
-    
+
     # Append new data
     existing_data.append(data)
 
@@ -94,6 +109,6 @@ async def upload_video(title: str = Form(...), file: UploadFile = File(...), ima
     image_path = f"./uploaded-images/{image_name}"
     with open(image_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
-    
-    # Return a success response
-    return JSONResponse(content={"message": "Video uploaded successfully"}, status_code=200)
+
+    return RedirectResponse("/", status_code=303)
+

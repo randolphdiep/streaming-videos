@@ -3,26 +3,28 @@
 
 <head>
     <title>Video Info</title>
-    <style>
-        .list {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
 </head>
 
-<body>
-    <button onclick="location.href='/upload-video'" type="button">
-        Upload Video
-    </button>
+<body class="list-page">
+    <div class="contain-btn">
+        <label id="home">Home Page</label>
+        <button onclick="location.href='/upload-video'" type="button" id="button">
+            Upload Video
+        </button>
+    </div>
+
     <div class="list">
         {% for video in video_info %}
         <div class="video">
             <a href="http://localhost:8000/streaming/{{video.file_id}}">
-                <h1>{{ video.title }}</h1>
+                {% set image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] %}
+                {% for ext in image_extensions %}
+                    {% set image_url = '/uploaded-images/' + video.file_id + ext %}
+                    <img src="{{ image_url }}" width="100" onerror="this.style.display='none';">
+                {% endfor %}
+                <h2>{{ video.title }}</h2>
             </a>
-            <img src="/uploaded-images/{{ video.file_id }}.jpg" width="100">
         </div>
         {% endfor %}
     </div>
