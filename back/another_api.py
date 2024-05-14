@@ -7,7 +7,9 @@ from fastapi import Header
 from fastapi.templating import Jinja2Templates
 import shutil
 import os
+import requests
 import json
+from pytube import YouTube
 from datetime import datetime
 
 
@@ -15,7 +17,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploaded-images", StaticFiles(directory="uploaded-images"), name="uploaded-images")
-CHUNK_SIZE = 1024*1024
+CHUNK_SIZE = 500*500  # 500KB
 # video_path = Path("./uploaded-videos/20240414124036.mp4")
 
 
@@ -92,7 +94,7 @@ async def upload_video(title: str = Form(...), file: UploadFile = File(...), ima
         json.dump(existing_data, log_file)
 
      # Check if the file is a video
-    if ext not in ['.mp4', '.avi', '.mov', '.flv', '.wmv']:  # Add or remove extensions as needed
+    if ext not in ['.mp4', '.webm']:  # Add or remove extensions as needed
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload a video file.")
 
     file_name = f"{file_id}{ext}"
@@ -110,5 +112,41 @@ async def upload_video(title: str = Form(...), file: UploadFile = File(...), ima
     with open(image_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
+    return RedirectResponse("/", status_code=303)
+
+@app.get("/download-video",response_class=HTMLResponse)
+async def download_youtube_video(request: Request):
+    return templates.TemplateResponse("download-form.html", {"request": request})
+
+@app.post("/download-video")
+async def download_youtube_video(video_url: str = Form(...)):
+    yt = YouTube(video_url)
+    stream = yt.streams.get_highest_resolution()
+
+    # Get current date and time
+    file_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    # Get the file extension
+    _, file_extension = os.path.splitext(stream.default_filename)
+
+    # Download and rename the video, store it in the ./uploaded-videos folder
+    stream.download(output_path='./uploaded-videos', filename=f"{file_id}{file_extension}")
+
+    # Get the URL of the thumbnail
+    thumbnail_url = yt.thumbnail_url
+
+    # Download the thumbnail and store it in the ./uploaded-images folder
+    response = requests.get(thumbnail_url)
+    with open(os.path.join('./uploaded-images', f'{file_id}.jpg'), 'wb') as out_file:
+        out_file.write(response.content)
+    data = {"file_id": file_id, "title": yt.title, "ext": file_extension}
+    # Read existing data
+    with open("file-info.json", "r") as log_file:
+        existing_data = json.load(log_file)
+     # Append new data
+    existing_data.append(data)
+
+    with open("file-info.json", "w") as log_file:
+        json.dump(existing_data, log_file)
     return RedirectResponse("/", status_code=303)
 

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha512-2uXDRNz08VV5dsiu6H/oOSy4DBtQsgFQfJITf5CKgq9JL5SJ1sKbclVfddTz+/VnsGv2VZ8K4XhBYV8bS9HdJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}?v=2">
+</head>
+
+<body class="upload-page">
+    <div class="container-title">
+        <h1>Download Video</h1>
+    </div>
+
+    <div class="container">
+        <form method="POST" enctype="multipart/form-data" id="upload-form">
+            <label for="video_url">Video URL</label>
+            <input type="text" name="video_url" id="video_url" required><br>
+            <input type="submit" value="Download" class="upload-btn">
+        </form>
+    </div>
+</body>
+
+</html>

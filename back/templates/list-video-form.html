@@ -12,6 +12,9 @@
         <button onclick="location.href='/upload-video'" type="button" id="button">
             Upload Video
         </button>
+        <button onclick="location.href='/download-video'" type="button" id="button">
+            Download Video
+        </button>
     </div>
 
     <div class="list">
@@ -20,8 +23,8 @@
             <a href="http://localhost:8000/streaming/{{video.file_id}}">
                 {% set image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] %}
                 {% for ext in image_extensions %}
-                    {% set image_url = '/uploaded-images/' + video.file_id + ext %}
-                    <img src="{{ image_url }}" width="100" onerror="this.style.display='none';">
+                {% set image_url = '/uploaded-images/' + video.file_id + ext %}
+                <img src="{{ image_url }}" width="100" onerror="this.style.display='none';">
                 {% endfor %}
                 <h2>{{ video.title }}</h2>
             </a>
