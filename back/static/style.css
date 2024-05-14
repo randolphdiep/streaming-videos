@@ -203,6 +203,7 @@
     margin-bottom: 30px;
     display: flex;
     justify-content: flex-end;
+    gap: 5px;
 }
 
 .list-page {
@@ -223,7 +224,7 @@
 
 .list-page #home {
     line-height: 55px;
-    margin-right: 538px;
+    margin-right: 380px;
     font-weight: bold;
     color: white;
     font-size: 35px;
